@@ -30,31 +30,49 @@ const PathFinder: Component = () => {
   const [found, setFound] = createSignal(false);
   const [algo, setAlgo] = createSignal(Algos.astar);
 
-  let nodes: { id: number, status: string, hval: number, gval: number }[] = [];
-  const gridWidth = 15;
+  const gridWidth = 10;
   const startNode = 0;
   const endNode = (gridWidth ** 2) - 1;
 
 
+  let ns: { id: number, status: string }[] = [];
+  for (let i = 0; i < gridWidth ** 2; i++) {
+    ns.push({ "id": i, "status": nodeStatusType.alive });
+  }
+  ns[startNode].status = nodeStatusType.startNode;
+  ns[endNode].status = nodeStatusType.endNode;
+  // setNodes(ns)
+  const [getNodes, setNodes] = createSignal(ns);
+
+  // console.log(getNodes());
+  //let nodes: { id: number, status: string, hval: number, gval: number }[] = [];
+
+
   function reset() {
     console.log('reset')
-    nodes = [];
-    for (let i = 0; i < gridWidth ** 2; i++) {
-      nodes.push({ "id": i, "status": nodeStatusType.alive });
-    }
-    nodes[startNode].status = nodeStatusType.startNode;
-    nodes[endNode].status = nodeStatusType.endNode;
-    setFound(false);
+    // console.log(getNodes())
+    setNodes(prevNodes => (
+      prevNodes.map((node => (
+        // id === startNode || id === endNode ? {...node, "status": nodeStatusType.startNode} : {...node, "status": nodeStatusType.alive}
+        node.status === nodeStatusType.path || node.status === nodeStatusType.visited ? {...node, "status": nodeStatusType.alive} : node
+      )))
+    ))
   }
 
-  reset();
+  // reset();
 
   function updateNodes(id, status) {
     // console.log("update Nodes", id, status);
 
-    nodes[id].status = status;
+    // nodes[id].status = status;
     // console.log("clicked", node.id)
     // console.log(nodes)
+
+    setNodes(prevNodes => (
+      prevNodes.map((node => (
+        id === node.id ? {...node, "status": status} : node
+      )))
+    ))
   }
 
   const dist = ((n1, n2) => {
@@ -66,7 +84,7 @@ const PathFinder: Component = () => {
     return pos[0] >= 0 && pos[0] < gridWidth && pos[1] >= 0 && pos[1] < gridWidth
   }
   function isDead(node) {
-    return nodes[node].status === nodeStatusType.dead;
+    return getNodes()[node].status === nodeStatusType.dead;
   }
 
   function posToNode(pos) {
@@ -95,7 +113,7 @@ const PathFinder: Component = () => {
 
 
   // console.log(dist([1, 2], [4, 6]));
-  //dist([1, 2], [4, 6])
+  // dist([1, 2], [4, 6])
   function findPath() {
 
 
@@ -149,7 +167,6 @@ const PathFinder: Component = () => {
         foundPath = true;
       } else {
         neighbours = getNeighbours(currNode);
-
         neighbours.map((neighbour) => {
           if (!gVal.hasOwnProperty(neighbour) || gVal[neighbour] > gVal[currNode] + 1) {
             // if (!(neighbour in visited)) {
@@ -163,23 +180,34 @@ const PathFinder: Component = () => {
     }
 
 
+    var nodes = {};
+    // console.log("before", nodes)
+
     visited.map(node => {
-      nodes[node].status = nodeStatusType.visited;
+      nodes[node]= nodeStatusType.visited;
     })
 
     if (foundPath) {
       currNode = prev[currNode];
+
       while (currNode != startNode) {
-        nodes[currNode].status = nodeStatusType.path;
+        nodes[currNode]= nodeStatusType.path;
         currNode = prev[currNode];
         // console.log('found');
       }
 
       // console.log('found');
-      nodes[startNode].status = nodeStatusType.startNode;
-      nodes[endNode].status = nodeStatusType.endNode;
+      nodes[startNode]= nodeStatusType.startNode;
+      nodes[endNode]= nodeStatusType.endNode;
       setFound(true);
+      // setNodes(nodes);
     }
+    // console.log("after", nodes)
+    setNodes(prevNodes => (
+      prevNodes.map((node => (
+        nodes.hasOwnProperty(node.id) ? {...node, "status": nodes[node.id]} : node
+      )))
+    ))
     // console.log(nodes);
     // console.log(visited.length);
 
@@ -188,24 +216,17 @@ const PathFinder: Component = () => {
   // console.log('neighbours 8:', getNeighbours(8))
   function renderNodes() {
     return (
-      <>
-        {found()}
-        <SimpleGrid columns={gridWidth}>
-          {nodes.map((node) => (
-
-            found() ?
-              <Vertex id={node.id} variant="contained" color={node.status} updateNodes={updateNodes} >
-                {node.id}
-              </Vertex> :
-              <Vertex id={node.id} variant="contained" color={node.status} updateNodes={updateNodes} >
-                {node.id}
-              </Vertex>
-
-
-          ))}
-        </SimpleGrid>
+      <div>
         {console.log('rerender vertexs')}
-      </>
+        <SimpleGrid columns={gridWidth}>
+          <For each={getNodes()}>
+            {(node) =>
+              <Vertex id={node.id} variant="contained" color={node.status} updateNodes={updateNodes}>
+              </Vertex>
+            }
+          </For>
+        </SimpleGrid>
+      </div>
     )
   }
 
