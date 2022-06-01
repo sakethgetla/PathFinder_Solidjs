@@ -30,7 +30,7 @@ const PathFinder: Component = () => {
   const [found, setFound] = createSignal(false);
   const [algo, setAlgo] = createSignal(Algos.astar);
 
-  const gridWidth = 10;
+  const gridWidth = 20;
   const startNode = 0;
   const endNode = (gridWidth ** 2) - 1;
 
