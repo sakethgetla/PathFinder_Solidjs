@@ -1,6 +1,6 @@
 import type { Component } from 'solid-js';
 import { createSignal, createEffect, createMemo } from 'solid-js';
-import { SimpleGrid } from "@hope-ui/solid";
+import { Box, Button, Flex, Heading, HopeProvider, HStack, SimpleGrid, Spacer, VStack } from "@hope-ui/solid";
 //import { AppBar, ButtonGroup, Button } from '@mui/material';
 // import Button from "@suid/material/Button";
 // import Stack from "@suid/material/Stack";
@@ -15,14 +15,14 @@ enum Algos {
   huristic = 'Huristic'
 }
 
-const nodeStatusType = {
-  alive: 'secondary',
-  visited: 'primary',
-  dead: 'error',
-  path: 'warning',
-  startNode: 'success',
-  endNode: 'success',
-}
+// const nodeStatusType = {
+//   alive: 'secondary',
+//   visited: 'primary',
+//   dead: 'error',
+//   path: 'warning',
+//   startNode: 'success',
+//   endNode: 'success',
+// }
 
 
 const App: Component = () => {
@@ -42,8 +42,28 @@ const App: Component = () => {
 
   // console.log(nodes());
   return (
-    <div>
-      <PathFinder/>
+
+    <HopeProvider >
+        <Box bg="tomato" w="100%" p="$4" color="white" margin="5px">
+          <Flex>
+            <Box>
+              <Heading size="2xl">
+                Saketh Getla
+              </Heading>
+            </Box>
+            <Spacer />
+            <Box>
+              <Button
+                onClick={(e) => {
+                  e.preventDefault();
+                  window.location.href = "https://sakethgetla.github.io"
+                }} >
+                Games
+              </Button>
+            </Box>
+          </Flex>
+        </Box>
+        <PathFinder />
 
       {/* <SimpleGrid columns={gridWidth}> */}
       {/*   <For each={nodes()}> */}
@@ -54,8 +74,7 @@ const App: Component = () => {
       {/*   </For> */}
       {/* </SimpleGrid> */}
       {/* {nodes()} */}
-      {/* hello */}
-    </div>
+    </HopeProvider>
   );
 };
 
